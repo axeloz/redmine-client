@@ -1,0 +1,25 @@
+{
+  "name": "redmine-time-tracking",
+  "version": "1.0.0",
+  "description": "A Redmine time tracking application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Axel",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "gulp-livereload": "^3.8.1",
+    "gulp-sass": "^3.1.0",
+    "gulp-sourcemaps": "^2.4.0"
+  },
+  "dependencies": {
+    "bulma": "^0.3.1",
+    "electron-json-storage": "^2.0.2",
+    "electron-prebuilt": "^1.4.13",
+    "handlebars": "^4.0.6",
+    "menubar": "^5.2.0",
+    "moment": "^2.17.1",
+    "shell": "^0.3.2"
+  }
+}

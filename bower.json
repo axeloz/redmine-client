@@ -1,0 +1,21 @@
+{
+  "name": "redmine-time-tracking",
+  "description": "A Redmine time tracking application",
+  "main": "main.js",
+  "authors": [
+    "Axel"
+  ],
+  "license": "CC0-1.0",
+  "homepage": "https://github.com/electron/electron-quick-start",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "jquery": "^3.1.1"
+  }
+}

@@ -1,0 +1,131 @@
+$primary: #D02C1C;
+
+@import 'font-awesome.min.css';
+@import "../../node_modules/bulma/bulma.sass";
+
+body {
+	font-size: 12px;
+}
+
+.nav.header {
+	position: fixed;
+	width: 100%;
+}
+
+.app_title {
+	font-size: 18px;
+	color: #FFF;
+}
+
+.quick-task-id {
+	width: 60px;
+}
+
+#main-section {
+	padding-top: 70px;
+
+	.tickets {
+		.ticket {
+
+			.progress {
+				max-width: 50%;
+			}
+
+			h3 {
+				margin: 0.01rem 0.01rem 1.2rem 0.01rem;
+
+				&.private-true:after {
+					content: 'private';
+					position: relative;
+					bottom: 2px;
+					text-transform: uppercase;
+					background: $orange;
+					color: findColorInvert($orange);
+					font-weight: bold;
+					padding: 2px 4px;
+					font-size: 60%;
+					margin-left: 6px;
+					border-radius: 2px;
+				}
+			}
+
+			.tag {
+
+				// Normal
+				&.priority-4 {
+					background-color: $turquoise;
+					color: findColorInvert($turquoise);
+				}
+
+				// High
+				&.priority-5 {
+					background-color: $orange;
+					color: findColorInvert($orange);
+				}
+
+				// Urgent, immediate
+				&.priority-6, &.priority-7 {
+					background-color: $red;
+					color: findColorInvert($red);
+				}
+
+				// New
+				&.status-1 {
+					background-color: $yellow;
+					color: findColorInvert($yellow);
+				}
+
+				// In progress
+				&.status-2 {
+					background-color: $blue;
+					color: findColorInvert($blue);
+				}
+
+				// Solved
+				&.status-3 {
+					background-color: $green;
+					color: findColorInvert($green);
+				}
+
+				// Solved
+				&.status-5 {
+					background-color: $grey-darker;
+					color: findColorInvert($grey-darker);
+				}
+
+			}
+
+			.column {
+				padding: 0rem 0.75rem;
+
+				&.label {
+					text-align: right;
+				}
+			}
+
+			.column:last-child {
+				margin-bottom: 30px;
+			}
+		}
+	}
+}
+
+nav {
+	&.nav {
+		background-color: #000;
+	}
+
+	.button {
+		&.redmine {
+			background-color: #4e5f5c;
+		}
+	}
+}
+
+.filters .control select {
+	max-width: 200px;
+}
+
+.container {
+	margin: 10px 0;
+}

@@ -1,0 +1,234 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Redmine Client</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+
+	<body>
+		<nav class="nav header">
+			<div class="nav-left">
+			<a class="nav-item">
+				<img src="assets/img/logo.png" alt="Redmine logo">
+				&nbsp;<strong class="app_title">Redmine Client</strong>
+			</a>
+			</div>
+
+			<div class="nav-center">
+			<a class="nav-item" href="index.html" title="List all your Redmine tasks">
+				<span class="icon">
+				<i class="fa fa-list"></i>
+				</span>
+			</a>
+			<a class="nav-item" href="index.html" title="Add a custom task">
+				<span class="icon">
+				<i class="fa fa-plus-square"></i>
+				</span>
+			</a>
+			<a class="nav-item" href="index.html" title="View your timesheets">
+				<span class="icon">
+				<i class="fa fa-calendar"></i>
+				</span>
+			</a>
+			<a class="nav-item" href="settings.html" tiitle="Access to the application settings">
+				<span class="icon">
+				<i class="fa fa-cogs"></i>
+				</span>
+			</a>
+			</div>
+
+			<div class="nav-right nav-menu">
+				<span class="nav-item">
+					<form id="quick-task-id-frm">
+						<input type="text" class="is-small input quick-task-id" placeholder="Task ID" />
+					</form>
+				</span>
+				<span class="nav-item">
+					<a class="button is-primary is-small redmine" href="#">
+					<span>Go to Redmine</span>
+					</a>
+				</span>
+			</div>
+		</nav>
+
+		<section id="main-section" class="section">
+			<div class="tickets-filter tabs is-centered">
+				<ul>
+					<li data-filter="assigned_to_id" class="is-active">
+						<a>
+							<span class="icon is-small"><i class="fa fa-inbox"></i></span>
+							<span>Assigned to me</span>
+						</a>
+					</li>
+					<li data-filter="author_id" class="created-by-me">
+						<a>
+							<span class="icon is-small"><i class="fa fa-paper-plane-o"></i></span>
+							<span>Created by me</span>
+						</a>
+					</li>
+					<li data-filter="watcher_id" >
+						<a>
+							<span class="icon is-small"><i class="fa fa-eye"></i></span>
+							<span>Watched by me</span>
+						</a>
+					</li>
+					<li data-filter="all" >
+						<a>
+							<span class="icon is-small"><i class="fa fa-globe"></i></span>
+							<span>All issues</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+			<div class="filters control is-grouped">
+				<form id="filter_frm" method="post" action="#">
+					<div class="control">
+						<div class="select">
+							<select id="projects_list" data-filter="project_id">
+							</select>
+						</div>
+						&nbsp;
+						<div class="select">
+							<select id="trackers_list" data-filter="tracker_id">
+							</select>
+						</div>
+						&nbsp;
+						<div class="select" style="height: 30px;">
+							<select id="statuses_list" data-filter="status_id">
+							</select>
+						</div>
+						&nbsp;
+						<div class="select">
+							<select id="priorities_list" data-filter="priority_id">
+							</select>
+						</div>
+						&nbsp;
+						<input class="button is-primary is-small" type="submit" value="Filter" />
+						<button class="button is-light is-small filters-reset">Reset</button>
+					</div>
+				</form>
+			</div>
+
+			<section class="tickets">
+				<div class="container tickets-for-me">
+
+				</div>
+			</section>
+		</div>
+
+		<script id="tickets-list" type="text/x-handlebars-template">
+			<!--<h2 class="title">Showing {{issues.length}} out of {{total_count}} issues</h2>-->
+
+			{{#each issues}}
+				<div class="ticket box ticket_{{id}}">
+					<article class="media">
+						<div class="media-content">
+							<div class="content">
+
+								<h3 class="private-{{is_private}}"><a href="{{../redmine_host}}/issues/{{id}}">{{subject}}</a></h3>
+
+								<div class="columns is-multiline">
+									<div class="column is-1 label">
+										ID:
+									</div>
+									<div class="column is-5">
+										{{id}}
+									</div>
+									<div class="column is-1 label">
+										Project:
+									</div>
+									<div class="column is-5">
+										<a href="{{../redmine_host}}/projects/{{project.id}}">
+											{{project.name}}
+										</a>
+									</div>
+
+									<div class="column is-1 label">
+										Author:
+									</div>
+									<div class="column is-5">
+										<a href="{{../redmine_host}}/users/{{author.id}}">
+											{{author.name}}
+										</a>
+									</div>
+									<div class="column is-1 label">
+										Assignee:
+									</div>
+									<div class="column is-5">
+										<a href="{{../redmine_host}}/users/{{assigned_to.id}}">
+											{{assigned_to.name}}
+										</a>
+									</div>
+									<div class="column is-1 label">
+										Created:
+									</div>
+									<div class="column is-5">
+										{{nicetime created_on}}
+									</div>
+									<div class="column is-1 label">
+										Updated:
+									</div>
+									<div class="column is-5">
+										{{nicetime updated_on}}
+									</div>
+									<div class="column is-1 label">
+										Tracker:
+									</div>
+									<div class="column is-5">
+										{{tracker.name}}
+									</div>
+									<div class="column is-1 label">
+										Status:
+									</div>
+									<div class="column is-5">
+										<span class="tag status-{{status.id}}">{{status.name}}</span>
+									</div>
+									<div class="column is-1 label">
+										Priority:
+									</div>
+									<div class="column is-5">
+										<span class="tag priority-{{priority.id}}">{{priority.name}}</span>
+									</div>
+									<div class="column is-1 label">
+										Done:
+									</div>
+									<div class="column is-5">
+										<progress class="progress is-warning" value="{{done_ratio}}" max="100">{{done_ratio}}</progress>
+									</div>
+
+								</div>
+
+								{{{description}}}
+
+							</div>
+							<nav class="level">
+								<div class="level-left">
+									<a class="level-item">
+									<span class="icon is-small"><i class="fa fa-reply"></i></span>
+									</a>
+									<a class="level-item">
+									<span class="icon is-small"><i class="fa fa-retweet"></i></span>
+									</a>
+									<a class="level-item">
+									<span class="icon is-small"><i class="fa fa-heart"></i></span>
+									</a>
+								</div>
+
+							</nav>
+						</div>
+					</article>
+				</div>
+			{{/each}}
+			</div>
+		</script>
+
+		<script>
+			window.$ = window.jQuery = require('./assets/js/jquery.min.js');
+		</script>
+		<script src="assets/js/config.js"></script>
+		<script src="assets/js/main.js"></script>
+		<script src="http://localhost:35729/livereload.js"></script>
+	</body>
+</html>
