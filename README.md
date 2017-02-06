@@ -27,4 +27,6 @@ Filtering:
   - Add sorting
   - Add time tracking
   - Add ability to modify a task (status, comment, ...)
+  - Add a loader when requesting the API
+  - 
 

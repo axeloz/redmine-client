@@ -48,6 +48,11 @@ RedmineIssues.prototype.init = function() {
 		}
 	});
 
+	this.getProjects();
+	this.getStatuses();
+	this.getTrackers();
+	this.getPriorities();
+
 	$(document).on('click', 'a[href^="http"]', function(e) {
 		e.preventDefault();
 		shell.openExternal(this.href);
@@ -107,11 +112,32 @@ RedmineIssues.prototype.init = function() {
 };
 
 RedmineIssues.prototype.getProjects = function(){
-	$.get(host + '/projects.json', this.filters.getCurrent(), function(response, status) {
+	$.get(host + '/projects.json', {
+		'limit'				: 1000,
+		'include'			: 'enabled_modules'
+	}, function(response, status) {
 		for (i in response.projects) {
 			if (response.projects[i].status == 5) {
 				continue;
 			}
+
+			/**
+			* Some projects don't have the issues
+			* tracking module enabled
+			* No need to list them
+			*/
+			var has_issues = false;
+			for (var j in response.projects[i].enabled_modules) {
+				if (response.projects[i].enabled_modules[j].name == 'issue_tracking') {
+					has_issues = true;
+				}
+			}
+
+			if (has_issues == false) {
+				continue;
+			}
+
+
 
 			$('#projects_list').append('<option value="'+response.projects[i].id+'">'+response.projects[i].name.toUpperCase()+'</option>');
 		}
@@ -129,7 +155,7 @@ RedmineIssues.prototype.getTrackers = function(){
 	}, 'json');
 };
 
-RedmineIssues.prototype.get_statuses = function(){
+RedmineIssues.prototype.getStatuses = function(){
 	$.get(host + '/issue_statuses.json', {
 		limit: 1000,
 		sort: 'name'
@@ -186,13 +212,13 @@ RedmineIssues.prototype.getUserTickets = function(){
 		var select_cache = [];
 
 		for (var select in selects) {
-			$(selects[select].container).children('option').remove();
+			/*$(selects[select].container).children('option').remove();
 			var el = document.createElement('option');
 			$(el)
 				.attr('value', 0)
 				.text('--- '+selects[select].label+' ---')
 			;
-			$(el).appendTo(selects[select]['container']);
+			$(el).appendTo(selects[select]['container']);*/
 		}
 
 		for (var issue in response.issues) {
@@ -214,7 +240,7 @@ RedmineIssues.prototype.getUserTickets = function(){
 						.attr('value', item[select].id)
 						.text(item[select].name)
 					;
-					$(el).appendTo(selects[select]['container']);
+					//$(el).appendTo(selects[select]['container']);
 
 					if (that.filters.getFilter(selects[select]['filter_id']) == item[select].id) {
 						$(el).attr('selected', 'selected');
@@ -256,6 +282,7 @@ Filters.prototype.reset = function() {
 
 Filters.prototype.unsetFilters = function() {
 	for (i = 0; i < arguments.length; ++i) {
+		console.log('Unsetting filter: '+arguments[i]);
 		delete this.cfilters[arguments[i]];
 	}
 	return this;
