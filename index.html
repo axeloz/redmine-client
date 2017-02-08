@@ -68,30 +68,30 @@
 					<div class="control">
 						<div class="select">
 							<select id="projects_list" data-filter="project_id">
-								<option value="0">-- Projects --</option>
+								<option value="0">-- Any project --</option>
 							</select>
 						</div>
 						&nbsp;
 						<div class="select">
 							<select id="trackers_list" data-filter="tracker_id">
-								<option value="0">-- Trackers --</option>
+								<option value="0">-- Any tracker --</option>
 							</select>
 						</div>
 						&nbsp;
 						<div class="select" style="height: 30px;">
 							<select id="statuses_list" data-filter="status_id">
-								<option value="0">-- Statuses --</option>
+								<option value="0">-- Any status --</option>
 							</select>
 						</div>
 						&nbsp;
 						<div class="select">
 							<select id="priorities_list" data-filter="priority_id">
-								<option value="0">-- Priorities --</option>
+								<option value="0">-- Any priority --</option>
 							</select>
 						</div>
 						&nbsp;
 						<input class="button is-primary is-small" type="submit" value="Filter" />
-						<button class="button is-light is-small filters-reset">Reset</button>
+						<!--<a class="button is-light is-small filters-reset">Reset</a>-->
 					</div>
 				</form>
 			</div>
@@ -106,106 +106,112 @@
 		<script id="tickets-list" type="text/x-handlebars-template">
 			<!--<h2 class="title">Showing {{issues.length}} out of {{total_count}} issues</h2>-->
 
-			{{#each issues}}
-				<div class="ticket box ticket_{{id}}">
-					<article class="media">
-						<div class="media-content">
-							<div class="content">
+			{{#if issues}}
+				{{#each issues}}
+					<div class="ticket box ticket_{{id}}">
+						<article class="media">
+							<div class="media-content">
+								<div class="content">
 
-								<h3 class="private-{{is_private}}"><a href="{{../redmine_host}}/issues/{{id}}">{{subject}}</a></h3>
+									<h3 class="private-{{is_private}}"><a href="{{../redmine_host}}/issues/{{id}}">{{subject}}</a></h3>
 
-								<div class="columns is-multiline">
-									<div class="column is-1 label">
-										ID:
-									</div>
-									<div class="column is-5">
-										{{id}}
-									</div>
-									<div class="column is-1 label">
-										Project:
-									</div>
-									<div class="column is-5">
-										<a href="{{../redmine_host}}/projects/{{project.id}}">
-											{{project.name}}
-										</a>
+									<div class="columns is-multiline">
+										<div class="column is-1 label">
+											ID:
+										</div>
+										<div class="column is-5">
+											{{id}}
+										</div>
+										<div class="column is-1 label">
+											Project:
+										</div>
+										<div class="column is-5">
+											<a href="{{../redmine_host}}/projects/{{project.id}}">
+												{{project.name}}
+											</a>
+										</div>
+
+										<div class="column is-1 label">
+											Author:
+										</div>
+										<div class="column is-5">
+											<a href="{{../redmine_host}}/users/{{author.id}}">
+												{{author.name}}
+											</a>
+										</div>
+										<div class="column is-1 label">
+											Assignee:
+										</div>
+										<div class="column is-5">
+											<a href="{{../redmine_host}}/users/{{assigned_to.id}}">
+												{{assigned_to.name}}
+											</a>
+										</div>
+										<div class="column is-1 label">
+											Created:
+										</div>
+										<div class="column is-5">
+											{{nicetime created_on}}
+										</div>
+										<div class="column is-1 label">
+											Updated:
+										</div>
+										<div class="column is-5">
+											{{nicetime updated_on}}
+										</div>
+										<div class="column is-1 label">
+											Tracker:
+										</div>
+										<div class="column is-5">
+											{{tracker.name}}
+										</div>
+										<div class="column is-1 label">
+											Status:
+										</div>
+										<div class="column is-5">
+											<span class="tag status-{{status.id}}">{{status.name}}</span>
+										</div>
+										<div class="column is-1 label">
+											Priority:
+										</div>
+										<div class="column is-5">
+											<span class="tag priority-{{priority.id}}">{{priority.name}}</span>
+										</div>
+										<div class="column is-1 label">
+											Done:
+										</div>
+										<div class="column is-5">
+											<progress class="progress is-warning" value="{{done_ratio}}" max="100">{{done_ratio}}</progress>
+										</div>
+
 									</div>
 
-									<div class="column is-1 label">
-										Author:
-									</div>
-									<div class="column is-5">
-										<a href="{{../redmine_host}}/users/{{author.id}}">
-											{{author.name}}
-										</a>
-									</div>
-									<div class="column is-1 label">
-										Assignee:
-									</div>
-									<div class="column is-5">
-										<a href="{{../redmine_host}}/users/{{assigned_to.id}}">
-											{{assigned_to.name}}
-										</a>
-									</div>
-									<div class="column is-1 label">
-										Created:
-									</div>
-									<div class="column is-5">
-										{{nicetime created_on}}
-									</div>
-									<div class="column is-1 label">
-										Updated:
-									</div>
-									<div class="column is-5">
-										{{nicetime updated_on}}
-									</div>
-									<div class="column is-1 label">
-										Tracker:
-									</div>
-									<div class="column is-5">
-										{{tracker.name}}
-									</div>
-									<div class="column is-1 label">
-										Status:
-									</div>
-									<div class="column is-5">
-										<span class="tag status-{{status.id}}">{{status.name}}</span>
-									</div>
-									<div class="column is-1 label">
-										Priority:
-									</div>
-									<div class="column is-5">
-										<span class="tag priority-{{priority.id}}">{{priority.name}}</span>
-									</div>
-									<div class="column is-1 label">
-										Done:
-									</div>
-									<div class="column is-5">
-										<progress class="progress is-warning" value="{{done_ratio}}" max="100">{{done_ratio}}</progress>
-									</div>
+									{{{description}}}
 
 								</div>
+								<nav class="level">
+									<div class="level-left">
+										<a class="level-item">
+										<span class="icon is-small"><i class="fa fa-reply"></i></span>
+										</a>
+										<a class="level-item">
+										<span class="icon is-small"><i class="fa fa-retweet"></i></span>
+										</a>
+										<a class="level-item">
+										<span class="icon is-small"><i class="fa fa-heart"></i></span>
+										</a>
+									</div>
 
-								{{{description}}}
-
+								</nav>
 							</div>
-							<nav class="level">
-								<div class="level-left">
-									<a class="level-item">
-									<span class="icon is-small"><i class="fa fa-reply"></i></span>
-									</a>
-									<a class="level-item">
-									<span class="icon is-small"><i class="fa fa-retweet"></i></span>
-									</a>
-									<a class="level-item">
-									<span class="icon is-small"><i class="fa fa-heart"></i></span>
-									</a>
-								</div>
-
-							</nav>
-						</div>
-					</article>
+						</article>
+					</div>
+				{{/each}}
+			{{else}}
+				<div class="no-result-found notification">
+					We could not find any result, change your filters.
 				</div>
-			{{/each}}
+			{{/if}}
 			</div>
 		</script>
 

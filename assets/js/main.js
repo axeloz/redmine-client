@@ -48,10 +48,12 @@ RedmineIssues.prototype.init = function() {
 		}
 	});
 
-	this.getProjects();
-	this.getStatuses();
-	this.getTrackers();
-	this.getPriorities();
+
+	that.getProjects();
+	that.getStatuses();
+	that.getTrackers();
+	that.getPriorities();
+
 
 	$(document).on('click', 'a[href^="http"]', function(e) {
 		e.preventDefault();
@@ -111,13 +113,27 @@ RedmineIssues.prototype.init = function() {
 
 };
 
-RedmineIssues.prototype.getProjects = function(){
+
+RedmineIssues.prototype.getProjects = function() {
+	that = this;
+
+	var projects_order = projects_index = [];
+
 	$.get(host + '/projects.json', {
 		'limit'				: 1000,
 		'include'			: 'enabled_modules'
 	}, function(response, status) {
-		for (i in response.projects) {
-			if (response.projects[i].status == 5) {
+
+		$('#projects_list').children('option').not(':first').remove();
+
+		for (var i in response.projects) {
+
+			var project = response.projects[i];
+
+			/**
+			* Removing archived projects from the list
+			*/
+			if (project.status == 5) {
 				continue;
 			}
 
@@ -126,21 +142,17 @@ RedmineIssues.prototype.getProjects = function(){
 			* tracking module enabled
 			* No need to list them
 			*/
-			var has_issues = false;
-			for (var j in response.projects[i].enabled_modules) {
-				if (response.projects[i].enabled_modules[j].name == 'issue_tracking') {
-					has_issues = true;
+			response.projects[i].disabled = true;
+			for (var j in project.enabled_modules) {
+				if (project.enabled_modules[j].name == 'issue_tracking') {
+					response.projects[i].disabled = false;
 				}
 			}
 
-			if (has_issues == false) {
-				continue;
-			}
+			$('#projects_list').append('<option ' + (response.projects[i].disabled == true ? 'disabled="disabled"': '')+ ' value="'+response.projects[i].id+'">'+response.projects[i].name.toUpperCase()+'</option>');
 
-
-
-			$('#projects_list').append('<option value="'+response.projects[i].id+'">'+response.projects[i].name.toUpperCase()+'</option>');
 		}
+
 	}, 'json');
 };
 
@@ -149,9 +161,13 @@ RedmineIssues.prototype.getTrackers = function(){
 		limit: 1000,
 		sort: 'name'
 	}, function(response, status) {
+
+		$('#trackers_list').children('option').not(':first').remove();
+
 		for (i in response.trackers) {
 			$('#trackers_list').append('<option value="'+response.trackers[i].id+'">'+response.trackers[i].name+'</option>');
 		}
+
 	}, 'json');
 };
 
@@ -160,6 +176,9 @@ RedmineIssues.prototype.getStatuses = function(){
 		limit: 1000,
 		sort: 'name'
 	}, function(response, status) {
+
+		$('#statuses_list').children('option').not(':first').remove();
+
 		for (i in response.issue_statuses) {
 			$('#statuses_list').append('<option value="'+response.issue_statuses[i].id+'">'+response.issue_statuses[i].name+'</option>');
 		}
@@ -171,6 +190,9 @@ RedmineIssues.prototype.getPriorities = function(){
 		limit: 1000,
 		sort: 'name'
 	}, function(response, status) {
+
+		$('#priorities_list').children('option').not(':first').remove();
+
 		for (i in response.issue_priorities) {
 			$('#priorities_list').append('<option value="'+response.issue_priorities[i].id+'">'+response.issue_priorities[i].name+'</option>');
 		}
@@ -178,10 +200,10 @@ RedmineIssues.prototype.getPriorities = function(){
 };
 
 RedmineIssues.prototype.getUserTickets = function(){
-
 	var that = this;
 
 	var filters		= this.filters.getCurrent();
+	console.log(filters);
 	var source		= $("#tickets-list").html();
 	var template	= Handlebars.compile(source);
 
@@ -209,44 +231,45 @@ RedmineIssues.prototype.getUserTickets = function(){
 				label		: 'Trackers'
 			}
 		}
-		var select_cache = [];
+
+		/**
+		* Removed feature
 
 		for (var select in selects) {
-			/*$(selects[select].container).children('option').remove();
+			$(selects[select].container).children('option').remove();
 			var el = document.createElement('option');
 			$(el)
 				.attr('value', 0)
 				.text('--- '+selects[select].label+' ---')
 			;
-			$(el).appendTo(selects[select]['container']);*/
-		}
+			$(el).appendTo(selects[select]['container']);
+		}*/
 
 		for (var issue in response.issues) {
 			var item = response.issues[issue];
 
-			// Cleaning
-			response.issues[issue].subject = response.issues[issue].subject.substring(0, 80);
+			// Shortening titles
+			response.issues[issue].subject = response.issues[issue].subject.substring(0, 100);
+
+			/**
+			* Todo : do something when current listing
+			* doesn't concern some filters
+			* maybe grey out the filters
 
 			for (var select in selects) {
-				if (! select_cache[select]) {
-					select_cache[select] = [];
+
+				var el = document.createElement('option');
+				$(el)
+					.attr('value', item[select].id)
+					.text(item[select].name)
+				;
+				//$(el).appendTo(selects[select]['container']);
+
+				if (that.filters.getFilter(selects[select]['filter_id']) == item[select].id) {
+					$(el).attr('selected', 'selected');
 				}
 
-				if (typeof select_cache[select][item[select].id] == 'undefined') {
-					select_cache[select][item[select].id] = item[select].name;
-
-					var el = document.createElement('option');
-					$(el)
-						.attr('value', item[select].id)
-						.text(item[select].name)
-					;
-					//$(el).appendTo(selects[select]['container']);
-
-					if (that.filters.getFilter(selects[select]['filter_id']) == item[select].id) {
-						$(el).attr('selected', 'selected');
-					}
-				}
-			}
+			}*/
 		}
 
 		response.redmine_host = host;

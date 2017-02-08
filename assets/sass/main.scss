@@ -25,6 +25,11 @@ body {
 	padding-top: 70px;
 
 	.tickets {
+
+		.no-result-found {
+			font-size: 1rem;
+		}
+
 		.ticket {
 
 			&.box {

@@ -46,4 +46,6 @@ gulp
   - Finish filtering feature
   - Search a task by ID
   - Manage projects and subprojects
+  - Translations
+  - Set toolbar icon dynamically (new tasks, time recording..)
 
