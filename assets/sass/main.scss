@@ -21,6 +21,16 @@ body {
 	width: 60px;
 }
 
+@keyframes show_ticket_details {
+	from { max-height: 0; }
+	to { max-height: initial; }
+}
+
+@keyframes hide_ticket_details {
+	from { max-height: inherit; }
+	to { max-height: 0; overflow: hidden; }
+}
+
 #main-section {
 	padding-top: 70px;
 
@@ -40,6 +50,12 @@ body {
 				}
 			}
 
+			.card-content {
+				padding: 0.1rem 1rem 1rem 1rem;
+
+	
+			}
+
 
 			.progress {
 				max-width: 50%;
@@ -48,6 +64,8 @@ body {
 			h3 {
 				margin: 0.01rem 0.01rem 1.2rem 0.01rem;
 				font-size: 1.2rem;
+				margin: 0.1rem;
+				padding: 0.45rem;
 
 				&.private-true:after {
 					content: 'private';
@@ -111,15 +129,22 @@ body {
 			}
 
 			.column {
-				padding: 0rem 0.75rem;
+				padding: 0rem 0.35rem;
 
 				&.label {
 					text-align: right;
 				}
 			}
 
-			.column:last-child {
-				margin-bottom: 30px;
+			.columns {
+				/*overflow: hidden;
+				max-height: 40px;*/
+
+				margin: 10px 0;
+
+				.label:not(:last-child) {
+					margin-bottom: 0.1rem;
+				}
 			}
 		}
 	}

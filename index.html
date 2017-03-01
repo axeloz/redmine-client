@@ -108,6 +108,102 @@
 
 			{{#if issues}}
 				{{#each issues}}
+					<div class="ticket ticket_{{id}} card" style="margin-bottom: 30px">
+						<header class="card-header">
+							<h3 class="card-header-title private-{{is_private}}">
+								<a href="{{../redmine_host}}/issues/{{id}}">{{subject}}</a>
+							</h3>
+							<a class="card-header-icon">
+								<span class="icon">
+								<i class="fa fa-angle-up"></i>
+								</span>
+							</a>
+						</header>
+						<div class="card-content hidden">
+							<div class="content">
+
+								<div class="columns is-multiline">
+									<div class="column is-1 label">
+										ID:
+									</div>
+									<div class="column is-3">
+										{{id}}
+									</div>
+									<div class="column is-1 label">
+										Project:
+									</div>
+									<div class="column is-3">
+										<a href="{{../redmine_host}}/projects/{{project.id}}">
+											{{project.name}}
+										</a>
+									</div>
+									<div class="column is-1 label">
+										Tracker:
+									</div>
+									<div class="column is-3">
+										{{tracker.name}}
+									</div>
+									<div class="column is-1 label">
+										Author:
+									</div>
+									<div class="column is-3">
+										<a href="{{../redmine_host}}/users/{{author.id}}">
+											{{author.name}}
+										</a>
+									</div>
+									<div class="column is-1 label">
+										Assignee:
+									</div>
+									<div class="column is-3">
+										<a href="{{../redmine_host}}/users/{{assigned_to.id}}">
+											{{assigned_to.name}}
+										</a>
+									</div>
+									<div class="column is-1 label">
+										Created:
+									</div>
+									<div class="column is-3">
+										{{nicetime created_on}}
+									</div>
+									<div class="column is-1 label">
+										Updated:
+									</div>
+									<div class="column is-3">
+										{{nicetime updated_on}}
+									</div>
+
+									<div class="column is-1 label">
+										Status:
+									</div>
+									<div class="column is-3">
+										<span class="tag status-{{status.id}}">{{status.name}}</span>
+									</div>
+									<div class="column is-1 label">
+										Priority:
+									</div>
+									<div class="column is-3">
+										<span class="tag priority-{{priority.id}}">{{priority.name}}</span>
+									</div>
+									<div class="column is-1 label">
+										Done:
+									</div>
+									<div class="column is-3">
+										<progress class="progress is-warning" value="{{done_ratio}}" max="100">{{done_ratio}}</progress>
+									</div>
+								</div>
+								<div class="ticket-description">
+									{{{description}}}
+								</div>
+							</div>
+						</div>
+						<footer class="card-footer">
+							<!--<a class="card-footer-item">Save</a>
+							<a class="card-footer-item">Edit</a>
+							<a class="card-footer-item">Delete</a>-->
+						</footer>
+					</div>
+
+					<!--
 					<div class="ticket box ticket_{{id}}">
 						<article class="media">
 							<div class="media-content">
@@ -119,22 +215,27 @@
 										<div class="column is-1 label">
 											ID:
 										</div>
-										<div class="column is-5">
+										<div class="column is-3">
 											{{id}}
 										</div>
 										<div class="column is-1 label">
 											Project:
 										</div>
-										<div class="column is-5">
+										<div class="column is-3">
 											<a href="{{../redmine_host}}/projects/{{project.id}}">
 												{{project.name}}
 											</a>
 										</div>
-
+										<div class="column is-1 label">
+											Tracker:
+										</div>
+										<div class="column is-3">
+											{{tracker.name}}
+										</div>
 										<div class="column is-1 label">
 											Author:
 										</div>
-										<div class="column is-5">
+										<div class="column is-3">
 											<a href="{{../redmine_host}}/users/{{author.id}}">
 												{{author.name}}
 											</a>
@@ -142,7 +243,7 @@
 										<div class="column is-1 label">
 											Assignee:
 										</div>
-										<div class="column is-5">
+										<div class="column is-3">
 											<a href="{{../redmine_host}}/users/{{assigned_to.id}}">
 												{{assigned_to.name}}
 											</a>
@@ -150,43 +251,40 @@
 										<div class="column is-1 label">
 											Created:
 										</div>
-										<div class="column is-5">
+										<div class="column is-3">
 											{{nicetime created_on}}
 										</div>
 										<div class="column is-1 label">
 											Updated:
 										</div>
-										<div class="column is-5">
+										<div class="column is-3">
 											{{nicetime updated_on}}
 										</div>
-										<div class="column is-1 label">
-											Tracker:
-										</div>
-										<div class="column is-5">
-											{{tracker.name}}
-										</div>
+
 										<div class="column is-1 label">
 											Status:
 										</div>
-										<div class="column is-5">
+										<div class="column is-3">
 											<span class="tag status-{{status.id}}">{{status.name}}</span>
 										</div>
 										<div class="column is-1 label">
 											Priority:
 										</div>
-										<div class="column is-5">
+										<div class="column is-3">
 											<span class="tag priority-{{priority.id}}">{{priority.name}}</span>
 										</div>
 										<div class="column is-1 label">
 											Done:
 										</div>
-										<div class="column is-5">
+										<div class="column is-3">
 											<progress class="progress is-warning" value="{{done_ratio}}" max="100">{{done_ratio}}</progress>
 										</div>
 
 									</div>
 
-									{{{description}}}
+									<div class="ticket-description">
+										{{{description}}}
+									</div>
 
 								</div>
 								<nav class="level">
@@ -205,7 +303,7 @@
 								</nav>
 							</div>
 						</article>
-					</div>
+					</div>-->
 				{{/each}}
 			{{else}}
 				<div class="no-result-found notification">
