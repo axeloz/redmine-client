@@ -3,3 +3,7 @@ bower_components/**/*
 
 assets/js/config.js
 dist/**/*
+
+# dev
+*.sublime-*
+/.gtm/
