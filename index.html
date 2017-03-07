@@ -190,6 +190,19 @@
 									<div class="column is-3">
 										<progress class="progress is-warning" value="{{done_ratio}}" max="100">{{done_ratio}}</progress>
 									</div>
+									<div class="column is-1 label">
+										Time entries:
+									</div>
+									{{#if timeEntries}}
+										{{#each timeEntries}}
+											<div class="column is-1">
+												<span class="tag priority-info">{{hours}}</span>
+											</div>
+										{{/each}}
+										<div class="column is-1">
+											<span class="tag priority-info">New</span>
+										</div>
+									{{/if}}
 								</div>
 								<div class="ticket-description">
 									{{{description}}}
