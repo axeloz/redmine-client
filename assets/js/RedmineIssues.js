@@ -3,6 +3,8 @@ const Filters = require('./Filters');
 function RedmineIssues(options) {
 	this.options	= options;
 	this.filters	= new Filters();
+	this.issues				= {};
+	this.timeEntries	= {};
 
 	return this;
 }
@@ -181,81 +183,34 @@ RedmineIssues.prototype.getPriorities = function(){
 
 RedmineIssues.prototype.getUserTickets = function(){
 	var that = this;
-
 	var filters		= this.filters.getCurrent();
-	console.log(filters);
-	var source		= $("#tickets-list").html();
-	var template	= Handlebars.compile(source);
 
-	$.get(host + '/issues.json', filters, function(response, status) {
+	$.when(
+		$.get(host + '/issues.json', filters, 'json'),
+		$.get(host + '/time_entries.json', { limit: 100 })
+	).then((issues, timeEntries) => {
+		that.issues = issues[0].issues;
 
-		var selects = {
-			project : {
-				container	: '#projects_list',
-				filter_id	: 'project_id',
-				label		: 'Projects'
-			},
-			priority : {
-				container	: '#priorities_list',
-				filter_id	: 'priority_id',
-				label		: 'Priorities'
-			},
-			status : {
-				container	: '#statuses_list',
-				filter_id	: 'status_id',
-				label		: 'Statuses'
-			},
-			tracker : {
-				container	: '#trackers_list',
-				filter_id	: 'tracker_id',
-				label		: 'Trackers'
+		var issuesID2Index = [];
+		var timeEntries = timeEntries[0].time_entries;
+
+		for(let i in that.issues){
+			issuesID2Index[that.issues[i].id] = i;
+			that.issues[i].timeEntries = [];
+		}
+
+		var index = null;
+		for(let i in timeEntries){
+			var issueID = timeEntries[i].issue.id;
+
+			if(index = issuesID2Index[issueID]){
+				that.issues[index].timeEntries.push(timeEntries[i]);
 			}
 		}
+		// TODO: what if we didn't recieved all of the time entries? Should requery API.
 
-		/**
-		* Removed feature
-
-		for (var select in selects) {
-			$(selects[select].container).children('option').remove();
-			var el = document.createElement('option');
-			$(el)
-				.attr('value', 0)
-				.text('--- '+selects[select].label+' ---')
-			;
-			$(el).appendTo(selects[select]['container']);
-		}*/
-
-		for (var issue in response.issues) {
-			var item = response.issues[issue];
-
-			// Shortening titles
-			response.issues[issue].subject = response.issues[issue].subject.substring(0, 100);
-
-			/**
-			* Todo : do something when current listing
-			* doesn't concern some filters
-			* maybe grey out the filters
-
-			for (var select in selects) {
-
-				var el = document.createElement('option');
-				$(el)
-					.attr('value', item[select].id)
-					.text(item[select].name)
-				;
-				//$(el).appendTo(selects[select]['container']);
-
-				if (that.filters.getFilter(selects[select]['filter_id']) == item[select].id) {
-					$(el).attr('selected', 'selected');
-				}
-
-			}*/
-		}
-
-		response.redmine_host = host;
-		var html 	= template(response);
-		$('.tickets .tickets-for-me').html(html);
-	}, 'json');
+		that.render();
+	})
 };
 
 RedmineIssues.prototype.getCurrentUser = function(){
@@ -264,6 +219,19 @@ RedmineIssues.prototype.getCurrentUser = function(){
 		return response;
 
 	}, 'json');
+};
+
+RedmineIssues.prototype.render = function(){
+	var data = {
+		issues: this.issues,
+		redmine_host: host,
+	};
+
+	var source		= $("#tickets-list").html();
+	var template	= Handlebars.compile(source);
+	var html 			= template(data);
+
+	$('.tickets .tickets-for-me').html(html);
 };
 
 module.exports = RedmineIssues;
