@@ -2,6 +2,7 @@ const 	Handlebars	= require('handlebars')
 		moment		= require('moment')
 		shell   = require('electron').shell
 		RedmineIssues		= require('./assets/js/RedmineIssues')
+		IssueNavigator	= require('./assets/js/IssueNavigator')
 ;
 
 /* Time Updates */
@@ -12,6 +13,7 @@ const 	Handlebars	= require('handlebars')
 var user_id = null;
 var limit = 100;
 
+new IssueNavigator();
 
 Handlebars.registerHelper('nicetime', function(time) {
   return moment(time, '').fromNow();

@@ -1,0 +1,82 @@
+%done-edit{
+  position: relative;
+
+  &:after{
+    content: attr(value);
+    position: absolute;
+    display: block;
+    top: -1px;
+    left: 50%;
+  }
+}
+
+%focused-container{
+  bla: 1;
+}
+
+%focused-container-focused-ticket{
+  transform: scale(1);
+}
+
+%focused-container-focused-ticket-edit{
+  animation: edit-anim 1s ease-out infinite alternate;
+
+  .progress{ @extend %done-edit }
+}
+
+%focused-container-focused-ticket-not-edit{
+  bla: 1;
+}
+
+%focused-container-not-focused-ticket{
+  background: transparentize($dark, .9);
+  transform: scale(.9);
+  opacity: 0.3;
+}
+
+%not-focused-container{
+  bla: 1;
+}
+
+%not-focused-container-not-focused-ticket{
+  bla: 1;
+}
+
+.tickets{
+  .ticket{
+    transition: all .3s ease;
+  }
+
+  &[focus]{
+    @extend %focused-container;
+
+    .ticket{
+      &[focus]{
+        @extend %focused-container-focused-ticket;
+
+        &[edit]{
+          @extend %focused-container-focused-ticket-edit;
+        }
+
+        &:not([edit]){
+          @extend %focused-container-focused-ticket-not-edit;
+        }
+      }
+
+      &:not([focus]){
+        @extend %focused-container-not-focused-ticket;
+      }
+    }
+  }
+
+  &:not([focus]){
+    .ticket{
+      @extend %not-focused-container-not-focused-ticket;
+    }
+  }
+}
+
+@keyframes edit-anim{
+  from{ background-color: transparentize($warning, 1 ); }
+  to  { background-color: transparentize($warning, .2); }
+}
