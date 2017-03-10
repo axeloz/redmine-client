@@ -108,7 +108,7 @@
 
 			{{#if issues}}
 				{{#each issues}}
-					<div class="ticket ticket_{{id}} card" style="margin-bottom: 30px">
+					<div class="ticket ticket_{{id}} card" style="margin-bottom: 30px" data-id="{{id}}">
 						<header class="card-header">
 							<h3 class="card-header-title private-{{is_private}}">
 								<a href="{{../redmine_host}}/issues/{{id}}">{{subject}}</a>

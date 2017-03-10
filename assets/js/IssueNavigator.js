@@ -1,3 +1,5 @@
+const {dialog} = require('electron').remote;
+
 class IssueNavigator {
 	constructor(){
 		this.$container = $('.tickets');
@@ -6,6 +8,8 @@ class IssueNavigator {
 		this.klass      = '.ticket';
 		this.focusAttr  = 'focus';
 		this.editAttr   = 'edit';
+		this.saveClass  = 'saving';
+		this.errorClass = 'error';
 		this.dirt       = null;
 
 		this.$container.on('click', this.klass, (e) => {
@@ -66,6 +70,7 @@ class IssueNavigator {
 
 		var $done = this.$focused.find('.progress');
 		this.dirt = {
+			id: this.$focused.attr('data-id'),
 			clean: {
 				done: {
 					$el: $done,
@@ -74,22 +79,29 @@ class IssueNavigator {
 			},
 			dirt: {}
 		};
+
 		return this;
 	}
 
 	isEdit() { return this.editing }
 
 	clearEdit() {
-		this.$focused.attr(this.editAttr, null);
-		this.editing = false;
-
 		if(!$.isEmptyObject(this.dirt.dirt)){
-			var save = confirm('Save changes? (unimplemented)');
-			if(save) this.save();
-			else     this.restore();
+			if(confirm('Save changes? (Restores otherwise!)')) this.save();
+			else                                               this.restore();
+		}else{
+			this.clearEditCB();
 		}
 
-		this.dirt = null;
+		return this;
+	}
+
+	clearEditCB(){
+		this.$focused.removeClass(this.errorClass);
+		this.$focused.removeClass(this.saveClass);
+		this.$focused.attr(this.editAttr, null);
+		this.editing = false;
+		this.dirt    = null;
 
 		return this;
 	}
@@ -123,14 +135,62 @@ class IssueNavigator {
 		return $el.is(':last-of-type') ? this.first() : $el.next(this.klass);
 	}
 
-	save(){
-		// TODO
-		console.error('Save unimplemented');
-		console.log('here is your dirt:', this.dirt.dirt);
+	save(cb){
+		this.$focused.removeClass(this.errorClass);
+		this.$focused.addClass(this.saveClass);
+
+		var issueData = {};
+		if(this.dirt.dirt.done) issueData.done_ratio = this.dirt.dirt.done;
+
+		$.ajax({
+			url     : `${host}/issues/${this.dirt.id}.json`,
+			method  : 'PUT',
+			data    : { issue: issueData },
+			success : this.clearEditCB.bind(this),
+			error   : this.saveError.bind(this),
+			dataType: 'text'
+		});
+
+		// TODO time entries
+
+		return this;
+	}
+
+	saveError(a, b, c){
+		this.$focused.removeClass(this.saveClass);
+		this.$focused.addClass(this.errorClass);
+
+		console.error('SaveError', a, b, c);
+
+		dialog.showMessageBox({
+			type     : 'error',
+			buttons  : ['Retry', 'Restore', 'No nothing'],
+			defaultId: 0,
+			title    : 'Oops...',
+			message  : 'Something went wrong!',
+			detail   : `${a.statusText} (${a.status}) See console for more details`
+		}, (response) => {
+			switch(response){
+				case 0: // Retry
+					this.save();
+					break;
+				case 1: // Restore
+					this.restore();
+					break;
+				case 2: // Do nothing
+					break;
+			}
+		});
+
+		return this;
 	}
 
 	restore(){
-		this.restoreDone();
+		this
+			.restoreDone()
+			.clearEditCB();
+
+		return this;
 	}
 
 	editDone(step){
@@ -145,9 +205,14 @@ class IssueNavigator {
 
 		this.dirt.clean.done.$el.val(val);
 		this.setDirt('done', val);
+
+		return this;
 	}
 
-	restoreDone(){ this.dirt.clean.done.$el.val(this.dirt.dirt.done) }
+	restoreDone(){
+		this.dirt.clean.done.$el.val(this.dirt.clean.done.val);
+		return this;
+	}
 }
 
 module.exports = IssueNavigator;

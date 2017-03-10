@@ -24,6 +24,14 @@
   .progress{ @extend %done-edit }
 }
 
+%focused-container-focused-ticket-saving{
+  animation: saving-anim .5s ease-out infinite alternate;
+}
+
+%focused-container-focused-ticket-error{
+  animation: error-anim .3s ease-out infinite alternate;
+}
+
 %focused-container-focused-ticket-not-edit{
   bla: 1;
 }
@@ -43,9 +51,7 @@
 }
 
 .tickets{
-  .ticket{
-    transition: all .3s ease;
-  }
+  .ticket{ transition: all .3s ease }
 
   &[focus]{
     @extend %focused-container;
@@ -54,29 +60,32 @@
       &[focus]{
         @extend %focused-container-focused-ticket;
 
-        &[edit]{
-          @extend %focused-container-focused-ticket-edit;
-        }
-
-        &:not([edit]){
-          @extend %focused-container-focused-ticket-not-edit;
-        }
+        &[edit]      { @extend %focused-container-focused-ticket-edit     }
+        &.saving     { @extend %focused-container-focused-ticket-saving   }
+        &.error      { @extend %focused-container-focused-ticket-error    }
+        &:not([edit]){ @extend %focused-container-focused-ticket-not-edit }
       }
 
-      &:not([focus]){
-        @extend %focused-container-not-focused-ticket;
-      }
+      &:not([focus]){ @extend %focused-container-not-focused-ticket }
     }
   }
 
   &:not([focus]){
-    .ticket{
-      @extend %not-focused-container-not-focused-ticket;
-    }
+    .ticket{ @extend %not-focused-container-not-focused-ticket }
   }
 }
 
 @keyframes edit-anim{
+  from{ background-color: transparentize($info, 1 ); }
+  to  { background-color: transparentize($info, .2); }
+}
+
+@keyframes saving-anim{
   from{ background-color: transparentize($warning, 1 ); }
   to  { background-color: transparentize($warning, .2); }
+}
+
+@keyframes error-anim{
+  from{ background-color: transparentize($danger, 1 ); }
+  to  { background-color: transparentize($danger, .2); }
 }
