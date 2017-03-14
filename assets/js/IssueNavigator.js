@@ -8,7 +8,7 @@ class IssueNavigator {
 		this.$container = $('.tickets');
 		this.$focused   = null;
 		this.editing    = false;
-		this.klass      = '.ticket';
+		this.klass      = 'ticket';
 		this.focusAttr  = 'focus';
 		this.editAttr   = 'edit';
 		this.saveClass  = 'saving';
@@ -16,7 +16,7 @@ class IssueNavigator {
 		this.dirt       = null;
 		this.activityId = 9; // "Développement" TODO
 
-		this.$container.on('click', this.klass, (e) => {
+		this.$container.on('click', `.${this.klass}`, (e) => {
 			this.focus($(e.currentTarget));
 		});
 
@@ -122,9 +122,9 @@ class IssueNavigator {
 		return this;
 	}
 
-	first(){ return this.$container.find(`${this.klass}:first-of-type`) }
+	first(){ return this.$container.find(`.${this.klass}:first-of-type`) }
 
-	last(){ return this.$container.find(`${this.klass}:last-of-type`) }
+	last(){ return this.$container.find(`.${this.klass}:last-of-type`) }
 
 	prev($el){
 		$el = typeof $el !== 'undefined'
@@ -132,7 +132,7 @@ class IssueNavigator {
 				: (this.hasFocus()
 					 ? this.$focused
 					 : this.first());
-		return $el.is(':first-of-type') ? this.last() : $el.prev(this.klass);
+		return $el.is(':first-of-type') ? this.last() : $el.prev(`.${this.klass}`);
 	}
 
 	next($el){
@@ -141,7 +141,7 @@ class IssueNavigator {
 				: (this.hasFocus()
 					 ? this.$focused
 					 : this.last());
-		return $el.is(':last-of-type') ? this.first() : $el.next(this.klass);
+		return $el.is(':last-of-type') ? this.first() : $el.next(`.${this.klass}`);
 	}
 
 	save(noIssue, noTime){
