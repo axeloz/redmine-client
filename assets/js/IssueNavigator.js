@@ -1,4 +1,5 @@
 const {dialog} = require('electron').remote;
+const utils    = require('./utils');
 
 class IssueNavigator {
 	constructor(redmineIssues){
@@ -72,12 +73,17 @@ class IssueNavigator {
 		this.editing = true;
 
 		var $done = this.$focused.find('.progress');
+		var $time = this.$focused.find('.time');
 		this.dirt = {
 			id: this.$focused.attr('data-id'),
 			clean: {
 				done: {
 					$el: $done,
 					val: $done.val()
+				},
+				time: {
+					$el: $time,
+					val: utils.hoursifyTime($time.text())
 				}
 			},
 			dirt: {}
@@ -229,7 +235,7 @@ class IssueNavigator {
 	}
 
 	restoreTime(){
-		// TODO
+		this.dirt.clean.time.$el.text(utils.prettifyTime(this.dirt.clean.time.val));
 
 		return this;
 	}
