@@ -13,7 +13,6 @@ const 	Handlebars	= require('handlebars')
 var user_id = null;
 var limit = 100;
 
-new IssueNavigator();
 
 Handlebars.registerHelper('nicetime', function(time) {
   return moment(time, '').fromNow();
@@ -22,5 +21,6 @@ Handlebars.registerHelper('nicetime', function(time) {
 // Whenever the app starts
 $(function() {
 	var App = new RedmineIssues();
+	var Nav = new IssueNavigator(App);
 	App.init();
 });

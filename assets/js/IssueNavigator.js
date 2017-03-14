@@ -1,7 +1,9 @@
 const {dialog} = require('electron').remote;
 
 class IssueNavigator {
-	constructor(){
+	constructor(redmineIssues){
+		this.redmineIssues = redmineIssues;
+
 		this.$container = $('.tickets');
 		this.$focused   = null;
 		this.editing    = false;
@@ -11,6 +13,7 @@ class IssueNavigator {
 		this.saveClass  = 'saving';
 		this.errorClass = 'error';
 		this.dirt       = null;
+		this.activityId = 9; // "Développement" TODO
 
 		this.$container.on('click', this.klass, (e) => {
 			this.focus($(e.currentTarget));
@@ -53,7 +56,7 @@ class IssueNavigator {
 
 	hasFocus(){ return !!this.$focused }
 
-	clearFocus(){ this;
+	clearFocus(){
 		if(!this.hasFocus()) return
 
 		this.$focused  .attr(this.focusAttr, null);
@@ -63,7 +66,7 @@ class IssueNavigator {
 	}
 
 	edit(){
-		if(!this.hasFocus()) return null;
+		if(!this.hasFocus() || this.isEdit()) return null;
 
 		this.$focused.attr(this.editAttr, true);
 		this.editing = true;
@@ -135,47 +138,57 @@ class IssueNavigator {
 		return $el.is(':last-of-type') ? this.first() : $el.next(this.klass);
 	}
 
-	save(cb){
+	save(noIssue, noTime){
 		this.$focused.removeClass(this.errorClass);
 		this.$focused.addClass(this.saveClass);
 
+		var ajax;
 		var issueData = {};
 		if(this.dirt.dirt.done) issueData.done_ratio = this.dirt.dirt.done;
 
-		$.ajax({
-			url     : `${host}/issues/${this.dirt.id}.json`,
-			method  : 'PUT',
-			data    : { issue: issueData },
-			success : this.clearEditCB.bind(this),
-			error   : this.saveError.bind(this),
-			dataType: 'text'
-		});
+		var timeData = {
+			issue_id: this.dirt.id,
+			hours: 1,
+			activity_id: this.activityId
+		};
 
-		// TODO time entries
+		if(!noIssue && !noTime) ajax = this.redmineIssues.updateAll(this.dirt.id, issueData, timeData);
+		else{
+			if(noIssue)           ajax = this.redmineIssues.updateTime (timeData);
+			if(noTime )           ajax = this.redmineIssues.updateIssue(this.dirt.id, issueData);
+		}
+
+		ajax
+			.done(this.clearEditCB.bind(this))
+			.fail(this.saveError  .bind(this));
 
 		return this;
 	}
 
-	saveError(a, b, c){
+	saveError(issueStatus, timeStatus){
 		this.$focused.removeClass(this.saveClass);
 		this.$focused.addClass(this.errorClass);
 
-		console.error('SaveError', a, b, c);
+		var msg = '';
+		if(!issueStatus) msg += 'Issue update errored\n';
+		if(!timeStatus ) msg += 'Time update errored\n';
+		msg += '(See console for more details)\n';
+		msg += '*: what errored only';
 
 		dialog.showMessageBox({
 			type     : 'error',
-			buttons  : ['Retry', 'Restore', 'No nothing'],
+			buttons  : ['Retry*', 'Restore*'],
 			defaultId: 0,
 			title    : 'Oops...',
 			message  : 'Something went wrong!',
-			detail   : `${a.statusText} (${a.status}) See console for more details`
+			detail   : msg
 		}, (response) => {
 			switch(response){
 				case 0: // Retry
-					this.save();
+					this.save(issueStatus, timeStatus);
 					break;
 				case 1: // Restore
-					this.restore();
+					this.restore(issueStatus, timeStatus);
 					break;
 				case 2: // Do nothing
 					break;
@@ -185,10 +198,11 @@ class IssueNavigator {
 		return this;
 	}
 
-	restore(){
-		this
-			.restoreDone()
-			.clearEditCB();
+	restore(noDone, noTime){
+		if(!noDone) this.restoreDone();
+		if(!noTime) this.restoreTime();
+
+		this.clearEditCB();
 
 		return this;
 	}
@@ -211,6 +225,12 @@ class IssueNavigator {
 
 	restoreDone(){
 		this.dirt.clean.done.$el.val(this.dirt.clean.done.val);
+		return this;
+	}
+
+	restoreTime(){
+		// TODO
+
 		return this;
 	}
 }
