@@ -196,7 +196,7 @@ RedmineIssues.prototype.getUserTickets = function(){
 
 		for(let i in that.issues){
 			issuesID2Index[that.issues[i].id] = i;
-			that.issues[i].timeEntries = [];
+			that.issues[i].time = 0;
 		}
 
 		var index = null;
@@ -204,7 +204,8 @@ RedmineIssues.prototype.getUserTickets = function(){
 			var issueID = timeEntries[i].issue.id;
 
 			if(index = issuesID2Index[issueID]){
-				that.issues[index].timeEntries.push(timeEntries[i]);
+				that.issues[index].time += timeEntries[i].hours;
+				that.issues[index].prettyTime = that._prettifyTime(that.issues[index].time);
 			}
 		}
 		// FIXME: what if we didn't recieved all of the time entries? Should requery API.
@@ -278,6 +279,24 @@ RedmineIssues.prototype.updateAll = function(id, issueData, timeData){
 	});
 
 	return retDef;
+};
+
+RedmineIssues.prototype._prettifyTime = function(hours){
+	var hoursADay = 8;
+
+	var d = hours / hoursADay;
+	var h = hours % hoursADay;
+	var m = (h%1) * 60;
+	var s = Math.round((m%1) * 60);
+
+	d = Math.floor(d);
+	h = Math.floor(h);
+	m = Math.floor(m);
+	m = d + h + m ? `${m}m` : '';
+	h = d + h     ? `${h}h` : '';
+	d = d         ? `${d}d` : '';
+
+	return `${d} ${h} ${m} ${s}s`;
 };
 
 module.exports = RedmineIssues;
