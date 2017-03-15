@@ -1,9 +1,9 @@
 const {dialog} = require('electron').remote;
-const utils    = require('./utils');
+const Issue    = require('./Issue');
 
 class IssueNavigator {
-	constructor(redmineIssues){
-		this.redmineIssues = redmineIssues;
+	constructor(){
+		this.issue = null;
 
 		this.$container = $('.tickets');
 		this.$focused   = null;
@@ -13,15 +13,13 @@ class IssueNavigator {
 		this.editAttr   = 'edit';
 		this.saveClass  = 'saving';
 		this.errorClass = 'error';
-		this.dirt       = null;
-		this.activityId = 9; // "Développement" TODO
 
-		this.$container.on('click', `.${this.klass}`, (e) => {
-			this.focus($(e.currentTarget));
-		});
+
+		this.$container.on('click', `.${this.klass}`, (e) => this.focus($(e.currentTarget)) );
 
 		$(window).on('keydown', (e) => {
-			console.log(e.keyCode)
+			console.log(e.keyCode);
+
 			switch(e.keyCode){
 				case 38: // UP
 					this.focus(this.prev());
@@ -30,10 +28,10 @@ class IssueNavigator {
 					this.focus(this.next());
 					break;
 				case 37: // LEFT
-					this.editDone(-10);
+					if(this.isEdit()) this.issue.editDone(-10);
 					break;
 				case 39: // RIGHT
-					this.editDone(+10);
+					if(this.isEdit()) this.issue.editDone(+10);
 					break;
 				case 13: // RETURN
 					this.edit();
@@ -47,18 +45,20 @@ class IssueNavigator {
 	}
 
 	focus($el){
-		if(this.hasFocus()) this.clearFocus();
+		this.clearFocus();
+
 		this.$focused = $el;
 		this.$focused  .attr(this.focusAttr, true);
 		this.$container.attr(this.focusAttr, true);
 		$('html, body').animate({ scrollTop: this.$focused.offset().top - $('.nav.header').height() - 20 }, 300);
+
 		return this;
 	}
 
 	hasFocus(){ return !!this.$focused }
 
 	clearFocus(){
-		if(!this.hasFocus()) return
+		if(!this.hasFocus()) return this;
 
 		this.$focused  .attr(this.focusAttr, null);
 		this.$container.attr(this.focusAttr, null);
@@ -72,22 +72,7 @@ class IssueNavigator {
 		this.$focused.attr(this.editAttr, true);
 		this.editing = true;
 
-		var $done = this.$focused.find('.progress');
-		var $time = this.$focused.find('.time');
-		this.dirt = {
-			id: this.$focused.attr('data-id'),
-			clean: {
-				done: {
-					$el: $done,
-					val: $done.val()
-				},
-				time: {
-					$el: $time,
-					val: utils.hoursifyTime($time.text())
-				}
-			},
-			dirt: {}
-		};
+		this.issue = new Issue(this.$focused, this.redmineIssues);
 
 		return this;
 	}
@@ -95,7 +80,7 @@ class IssueNavigator {
 	isEdit() { return this.editing }
 
 	clearEdit() {
-		if(!$.isEmptyObject(this.dirt.dirt)){
+		if(this.issue.isDirty()){
 			if(confirm('Save changes? (Restores otherwise!)')) this.save();
 			else                                               this.restore();
 		}else{
@@ -110,21 +95,13 @@ class IssueNavigator {
 		this.$focused.removeClass(this.saveClass);
 		this.$focused.attr(this.editAttr, null);
 		this.editing = false;
-		this.dirt    = null;
-
-		return this;
-	}
-
-	setDirt(key, val){
-		if(this.dirt.clean[key].val === val) delete this.dirt.dirt[key];
-		else                                 this.dirt.dirt[key] = val;
+		this.issue   = null;
 
 		return this;
 	}
 
 	first(){ return this.$container.find(`.${this.klass}:first-of-type`) }
-
-	last(){ return this.$container.find(`.${this.klass}:last-of-type`) }
+	last() { return this.$container.find(`.${this.klass}:last-of-type` ) }
 
 	prev($el){
 		$el = typeof $el !== 'undefined'
@@ -148,23 +125,7 @@ class IssueNavigator {
 		this.$focused.removeClass(this.errorClass);
 		this.$focused.addClass(this.saveClass);
 
-		var ajax;
-		var issueData = {};
-		if(this.dirt.dirt.done) issueData.done_ratio = this.dirt.dirt.done;
-
-		var timeData = {
-			issue_id: this.dirt.id,
-			hours: 1,
-			activity_id: this.activityId
-		};
-
-		if(!noIssue && !noTime) ajax = this.redmineIssues.updateAll(this.dirt.id, issueData, timeData);
-		else{
-			if(noIssue)           ajax = this.redmineIssues.updateTime (timeData);
-			if(noTime )           ajax = this.redmineIssues.updateIssue(this.dirt.id, issueData);
-		}
-
-		ajax
+		this.issue.save(noIssue, noTime)
 			.done(this.clearEditCB.bind(this))
 			.fail(this.saveError  .bind(this));
 
@@ -196,8 +157,6 @@ class IssueNavigator {
 				case 1: // Restore
 					this.restore(issueStatus, timeStatus);
 					break;
-				case 2: // Do nothing
-					break;
 			}
 		});
 
@@ -205,37 +164,10 @@ class IssueNavigator {
 	}
 
 	restore(noDone, noTime){
-		if(!noDone) this.restoreDone();
-		if(!noTime) this.restoreTime();
+		if(!noDone) this.issue.restoreDone();
+		if(!noTime) this.issue.restoreTime();
 
 		this.clearEditCB();
-
-		return this;
-	}
-
-	editDone(step){
-		if(!this.isEdit()) return null;
-
-		var val = Math.max(
-			Math.min(
-				this.dirt.clean.done.$el.val() + step,
-				100
-			), 0
-		);
-
-		this.dirt.clean.done.$el.val(val);
-		this.setDirt('done', val);
-
-		return this;
-	}
-
-	restoreDone(){
-		this.dirt.clean.done.$el.val(this.dirt.clean.done.val);
-		return this;
-	}
-
-	restoreTime(){
-		this.dirt.clean.time.$el.text(utils.prettifyTime(this.dirt.clean.time.val));
 
 		return this;
 	}
