@@ -16,6 +16,8 @@ var Utils = {
     return `${d} ${h} ${m} ${s}s`;
   },
   hoursifyTime: (time) => {
+    if(!time) return 0;
+
     var matches = /((\d+)d\s)?((\d+)h\s)?((\d+)m\s)?((\d+)s)/gi.exec(time);
 
     var d = matches[2] ? parseInt(matches[2]) * Utils.hoursADay : 0;

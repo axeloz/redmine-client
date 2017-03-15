@@ -14,32 +14,49 @@ class IssueNavigator {
 		this.saveClass  = 'saving';
 		this.errorClass = 'error';
 
+		this.registerActions();
+	}
 
+	registerActions(){
 		this.$container.on('click', `.${this.klass}`, (e) => this.focus($(e.currentTarget)) );
 
 		$(window).on('keydown', (e) => {
 			console.log(e.keyCode);
 
+			var RETURN  = 13;
+			var ESC     = 27;
+			var LEFT    = 37;
+			var UP      = 38;
+			var RIGHT   = 39;
+			var DOWN    = 40;
+			var noop    = () => {};
+			var nodef   = () => { return false };
+			var actions = { return: noop, esc: noop, left: noop, up: noop, right: noop, down: noop };
+
+			actions.up   = () => this.focus(this.prev());
+			actions.down = () => this.focus(this.next());
+
+			if(!this.hasFocus()){
+			}else{
+				if(!this.isEdit()){
+					actions.return = () => this.edit();
+					actions.esc    = () => this.clearFocus();
+				}else{
+					actions.up     = nodef;
+					actions.down   = nodef;
+					actions.left   = () => this.issue.editDone(-10);
+					actions.right  = () => this.issue.editDone(+10);
+					actions.return = () => this.clearEdit();
+				}
+			}
+
 			switch(e.keyCode){
-				case 38: // UP
-					this.focus(this.prev());
-					break;
-				case 40: // DOWN
-					this.focus(this.next());
-					break;
-				case 37: // LEFT
-					if(this.isEdit()) this.issue.editDone(-10);
-					break;
-				case 39: // RIGHT
-					if(this.isEdit()) this.issue.editDone(+10);
-					break;
-				case 13: // RETURN
-					this.edit();
-					break;
-				case 27: // ESC
-					if(this.isEdit()) this.clearEdit();
-					else              this.clearFocus();
-					break;
+				case UP    : return actions.up();
+				case DOWN  : return actions.down();
+				case LEFT  : return actions.left();
+				case RIGHT : return actions.right();
+				case RETURN: return actions.return();
+				case ESC   : return actions.esc();
 			}
 		})
 	}
