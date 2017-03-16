@@ -51,8 +51,11 @@ class Issue {
   }
 
   setDirt(key, val){
-    if(this.dirt.clean[key].val === val) delete this.dirt.dirt[key];
-    else                                 this.dirt.dirt[key] = val;
+    var sameVal = this.dirt.clean[key].val === val;
+    var noVal   = val === null;
+
+    if(sameVal || noVal) delete this.dirt.dirt[key];
+    else                 this.dirt.dirt[key] = val;
 
     return this;
   }
@@ -94,14 +97,14 @@ class Issue {
 
   restoreDone(){
     this.dirt.clean.done.$el.val(this.dirt.clean.done.val);
-    delete this.dirt.dirt.done;
+    this.setDirt('done', null);
 
     return this;
   }
 
   restoreTime(){
     this.dirt.clean.time.$el.text(utils.prettifyTime(this.dirt.clean.time.val));
-    delete this.dirt.dirt.time;
+    this.setDirt('time', null);
 
     return this;
   }
@@ -135,7 +138,7 @@ class Issue {
       .removeClass(`status-${dirtyId}`)
       .addClass(`status-${id}`);
 
-    delete this.dirt.dirt.status;
+    this.setDirt('status', null);
 
     return this;
   }
