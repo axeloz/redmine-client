@@ -26,7 +26,8 @@ var Utils = {
     var s = matches[8] ? parseInt(matches[8]) / 60 / 60         : 0;
 
     return Math.round((d + h + m + s) * 100) / 100;
-  }
+  },
+  mod: (a, b) => { return ((a%b)+b)%b },
 };
 
 module.exports = Utils;

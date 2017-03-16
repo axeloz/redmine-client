@@ -20,7 +20,9 @@ Handlebars.registerHelper('nicetime', function(time) {
 
 // Whenever the app starts
 $(function() {
-	var App = new RedmineIssues();
+	var App = new RedmineIssues({
+		statusesCB: (statuses) => { window.STATUSES = statuses }
+	});
 	window.Nav = new IssueNavigator();
 	App.init();
 });

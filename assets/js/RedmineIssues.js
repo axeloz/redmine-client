@@ -4,8 +4,7 @@ const utils  = require('./utils');
 function RedmineIssues(options) {
 	this.options	= options;
 	this.filters	= new Filters();
-	this.issues				= {};
-	this.timeEntries	= {};
+	this.issues		= [];
 
 	return this;
 }
@@ -33,7 +32,7 @@ RedmineIssues.prototype.init = function() {
 
 
 	that.getProjects();
-	that.getStatuses();
+	that.getStatuses(this.options.statusesCB ? this.options.statusesCB : () => {});
 	that.getTrackers();
 	that.getPriorities();
 
@@ -154,7 +153,9 @@ RedmineIssues.prototype.getTrackers = function(){
 	}, 'json');
 };
 
-RedmineIssues.prototype.getStatuses = function(){
+RedmineIssues.prototype.getStatuses = function(cb){
+	var statuses = [];
+
 	$.get(host + '/issue_statuses.json', {
 		limit: 1000,
 		sort: 'name'
@@ -163,8 +164,11 @@ RedmineIssues.prototype.getStatuses = function(){
 		$('#statuses_list').children('option').not(':first').remove();
 
 		for (i in response.issue_statuses) {
+			statuses.push({id: response.issue_statuses[i].id, name: response.issue_statuses[i].name });
 			$('#statuses_list').append('<option value="'+response.issue_statuses[i].id+'">'+response.issue_statuses[i].name+'</option>');
 		}
+
+		cb(statuses);
 	}, 'json');
 };
 

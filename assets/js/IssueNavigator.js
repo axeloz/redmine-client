@@ -42,8 +42,8 @@ class IssueNavigator {
 					actions.return = () => this.edit();
 					actions.esc    = () => this.clearFocus();
 				}else{
-					actions.up     = nodef;
-					actions.down   = nodef;
+					actions.up     = () => { this.issue.editStatus(-1); return false; }
+					actions.down   = () => { this.issue.editStatus(+1); return false; }
 					actions.left   = () => this.issue.editDone(-10);
 					actions.right  = () => this.issue.editDone(+10);
 					actions.return = () => this.clearEdit();
@@ -180,9 +180,12 @@ class IssueNavigator {
 		return this;
 	}
 
-	restore(noDone, noTime){
-		if(!noDone) this.issue.restoreDone();
-		if(!noTime) this.issue.restoreTime();
+	restore(noIssue, noTime){
+		if(!noTime ) this.issue.restoreTime();
+		if(!noIssue){
+			this.issue.restoreDone();
+			this.issue.restoreStatus();
+		}
 
 		this.clearEditCB();
 

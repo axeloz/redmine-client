@@ -5,9 +5,11 @@ class Issue {
     this.$el = $el;
     this.id  = $el.attr('data-id');
     this.activityId = 9; // "Développement" TODO
+    this.statuses   = null;
 
-    var $done = $el.find('.progress');
-    var $time = $el.find('.time');
+    var $done   = $el.find('.progress');
+    var $time   = $el.find('.time');
+    var $status = $el.find('[status]');
     this.dirt = {
       clean: {
         done: {
@@ -17,10 +19,31 @@ class Issue {
         time: {
           $el: $time,
           val: utils.hoursifyTime($time.text())
+        },
+        status: {
+          $el: $status,
+          val: parseInt($status.attr('status'))
         }
       },
       dirt: {}
     };
+  }
+
+  static getStatuses(){
+    if(!!this.statuses) return this.statuses;
+
+    var map      = [];
+    var statuses = window.STATUSES.slice().sort((a, b) => { return a.id - b.id });
+    for(let i in statuses){
+      map[statuses[i].id] = parseInt(i);
+    }
+
+    this.statuses = {
+      map     : map,
+      statuses: statuses
+    };
+
+    return this.statuses;
   }
 
   isDirty(){
@@ -36,7 +59,8 @@ class Issue {
 
   save(noIssue, noTime){
     var issueData = {};
-    if(this.dirt.dirt.done) issueData.done_ratio = this.dirt.dirt.done;
+    if(this.dirt.dirt.done)   issueData.done_ratio = this.dirt.dirt.done;
+    if(this.dirt.dirt.status) issueData.status_id  = this.dirt.dirt.status;
 
     var timeData = {
       issue_id: this.id,
@@ -70,12 +94,48 @@ class Issue {
 
   restoreDone(){
     this.dirt.clean.done.$el.val(this.dirt.clean.done.val);
+    delete this.dirt.dirt.done;
 
     return this;
   }
 
   restoreTime(){
     this.dirt.clean.time.$el.text(utils.prettifyTime(this.dirt.clean.time.val));
+    delete this.dirt.dirt.time;
+
+    return this;
+  }
+
+  editStatus(step){
+    if(!window.STATUSES) return null; // FIXME this is bad (global filled asynchronously)
+
+    var statuses = Issue.getStatuses();
+    var id       = this.dirt.clean.status.$el.attr('status');
+    var status   = statuses.statuses[utils.mod(statuses.map[id] + step, statuses.statuses.length)];
+
+    this.dirt.clean.status.$el
+      .attr('status', status.id)
+      .text(status.name)
+      .removeClass(`status-${id}`)
+      .addClass(`status-${status.id}`);
+    this.setDirt('status', status.id);
+
+    return this;
+  }
+
+  restoreStatus(){
+    var statuses = Issue.getStatuses();
+    var dirtyId = this.dirt.dirt .status;
+    var id      = this.dirt.clean.status.val;
+    var name    = statuses.statuses[statuses.map[id]].name;
+
+    this.dirt.clean.status.$el
+      .attr('status', id)
+      .text(name)
+      .removeClass(`status-${dirtyId}`)
+      .addClass(`status-${id}`);
+
+    delete this.dirt.dirt.status;
 
     return this;
   }
