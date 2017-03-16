@@ -46,16 +46,22 @@ class Issue {
     return this.statuses;
   }
 
-  isDirty(){
-    return !$.isEmptyObject(this.dirt.dirt);
+  isDirty(key){
+    if(!key) return !$.isEmptyObject(this.dirt.dirt);
+    else     return !!this.dirt.dirt[key];
   }
 
   setDirt(key, val){
     var sameVal = this.dirt.clean[key].val === val;
     var noVal   = val === null;
 
-    if(sameVal || noVal) delete this.dirt.dirt[key];
-    else                 this.dirt.dirt[key] = val;
+    if(sameVal || noVal){
+      delete this.dirt.dirt[key];
+      this.dirt.clean[key].$el.attr('dirty', null);
+    }else{
+      this.dirt.dirt[key] = val;
+      this.dirt.clean[key].$el.attr('dirty', true);
+    }
 
     return this;
   }

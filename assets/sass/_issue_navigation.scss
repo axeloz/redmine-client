@@ -51,7 +51,8 @@
 }
 
 .tickets{
-  .ticket{ transition: all .3s ease }
+  .ticket{ transition: all .3s ease  }
+  [dirty]{ border    : 1px solid red }
 
   &[focus]{
     @extend %focused-container;
