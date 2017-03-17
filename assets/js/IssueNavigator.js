@@ -11,6 +11,7 @@ class IssueNavigator {
 		this.klass      = 'ticket';
 		this.focusAttr  = 'focus';
 		this.editAttr   = 'edit';
+		this.dirtyAttr  = 'dirty';
 		this.saveClass  = 'saving';
 		this.errorClass = 'error';
 
@@ -29,9 +30,10 @@ class IssueNavigator {
 			var UP      = 38;
 			var RIGHT   = 39;
 			var DOWN    = 40;
+			var T       = 84;
 			var noop    = () => {};
 			var nodef   = () => { return false };
-			var actions = { return: noop, esc: noop, left: noop, up: noop, right: noop, down: noop };
+			var actions = { return: noop, esc: noop, left: noop, up: noop, right: noop, down: noop, t: noop };
 
 			actions.up   = () => this.focus(this.prev());
 			actions.down = () => this.focus(this.next());
@@ -47,6 +49,7 @@ class IssueNavigator {
 					actions.left   = () => this.issue.editDone(-10);
 					actions.right  = () => this.issue.editDone(+10);
 					actions.return = () => this.clearEdit();
+					actions.t      = () => this.issue.editTime();
 				}
 			}
 
@@ -57,6 +60,7 @@ class IssueNavigator {
 				case RIGHT : return actions.right();
 				case RETURN: return actions.return();
 				case ESC   : return actions.esc();
+				case T     : return actions.t();
 			}
 		})
 	}
@@ -111,6 +115,7 @@ class IssueNavigator {
 		this.$focused.removeClass(this.errorClass);
 		this.$focused.removeClass(this.saveClass);
 		this.$focused.attr(this.editAttr, null);
+		this.$focused.find(`[${this.dirtyAttr}]`).attr(this.dirtyAttr, null);
 		this.editing = false;
 		this.issue   = null;
 

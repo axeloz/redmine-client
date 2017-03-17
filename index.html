@@ -191,17 +191,17 @@
 										<progress class="progress is-warning" value="{{done_ratio}}" max="100">{{done_ratio}}</progress>
 									</div>
 									<div class="column is-1 label">
-										Time entries:
+										<u>T</u>ime entries:
 									</div>
-									{{#if prettyTime}}
-										<div class="column is-1">
-											<span class="time tag priority-info">{{prettyTime}}</span>
-										</div>
-									{{else}}
-										<div class="column is-1">
-											<span class="new-time tag priority-info">New</span>
-										</div>
-									{{/if}}
+									<div class="column is-1">
+										<span class="time tag priority-info">
+											{{#if prettyTime}}
+												{{prettyTime}}
+											{{else}}
+												New
+											{{/if}}
+										</span>
+									</div>
 								</div>
 								<div class="ticket-description">
 									{{{description}}}

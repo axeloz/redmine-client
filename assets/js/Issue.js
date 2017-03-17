@@ -6,6 +6,9 @@ class Issue {
     this.id  = $el.attr('data-id');
     this.activityId = 9; // "Développement" TODO
     this.statuses   = null;
+    this.interval   = null;
+
+    this.dirtyAttr = 'dirty';
 
     var $done   = $el.find('.progress');
     var $time   = $el.find('.time');
@@ -57,30 +60,39 @@ class Issue {
 
     if(sameVal || noVal){
       delete this.dirt.dirt[key];
-      this.dirt.clean[key].$el.attr('dirty', null);
+      this.dirt.clean[key].$el.attr(this.dirtyAttr, null);
     }else{
       this.dirt.dirt[key] = val;
-      this.dirt.clean[key].$el.attr('dirty', true);
+      this.dirt.clean[key].$el.attr(this.dirtyAttr, true);
     }
 
     return this;
   }
 
   save(noIssue, noTime){
+    this.editTime(true);
+
     var issueData = {};
     if(this.dirt.dirt.done)   issueData.done_ratio = this.dirt.dirt.done;
     if(this.dirt.dirt.status) issueData.status_id  = this.dirt.dirt.status;
 
-    var timeData = {
-      issue_id: this.id,
-      hours: 1,
-      activity_id: this.activityId
-    };
+    var timeData = {};
+    if(this.isDirty('time')){
+      var h = Math.max(.01, this.dirt.dirt.time - this.dirt.clean.time.val); // Redmine stores anything < 0.01 as 0.00!
+      timeData = {
+        issue_id   : this.id,
+        hours      : h,
+        activity_id: this.activityId
+      }
+    }
 
-    var ajax;
+    if($.isEmptyObject(issueData)) noIssue = true;
+    if($.isEmptyObject( timeData)) noTime  = true;
+
+    var ajax = $.when({}); // Immediate sync deferred, if no request are made
     if(!noIssue && !noTime) ajax = this.updateAll(this.id, issueData, timeData);
     else{
-      if(noIssue)           ajax = this.updateTime (timeData);
+      if(noIssue)           ajax = this.updateTime (timeData).done(() => { /* TODO update total time entry */ });
       if(noTime )           ajax = this.updateIssue(this.id, issueData);
     }
 
@@ -108,7 +120,31 @@ class Issue {
     return this;
   }
 
+  editTime(forceStop){
+    if(this.interval || forceStop){
+      clearInterval(this.interval);
+      this.interval = null;
+      return this;
+    }
+
+    var sec = 1/(60*60);
+    var updateTimer = () => {
+      var t = this.isDirty('time') ? this.dirt.dirt.time : this.dirt.clean.time.val;
+      t += sec;
+
+      this.setDirt('time', t);
+      this.dirt.clean.time.$el.text(utils.prettifyTime(t));
+    }
+
+    updateTimer();
+    this.interval = setInterval(updateTimer, 1000);
+
+    return this;
+  }
+
   restoreTime(){
+    this.editTime(true);
+
     this.dirt.clean.time.$el.text(utils.prettifyTime(this.dirt.clean.time.val));
     this.setDirt('time', null);
 
