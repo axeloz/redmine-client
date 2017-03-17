@@ -76,9 +76,12 @@ class Issue {
     if(this.dirt.dirt.done)   issueData.done_ratio = this.dirt.dirt.done;
     if(this.dirt.dirt.status) issueData.status_id  = this.dirt.dirt.status;
 
+    var correctTimeDisplay = false;
     var timeData = {};
     if(this.isDirty('time')){
       var h = Math.max(.01, this.dirt.dirt.time - this.dirt.clean.time.val); // Redmine stores anything < 0.01 as 0.00!
+      if(h === .01) correctTimeDisplay = true;
+
       timeData = {
         issue_id   : this.id,
         hours      : h,
@@ -92,7 +95,7 @@ class Issue {
     var ajax = $.when({}); // Immediate sync deferred, if no request are made
     if(!noIssue && !noTime) ajax = this.updateAll(this.id, issueData, timeData);
     else{
-      if(noIssue)           ajax = this.updateTime (timeData).done(() => { /* TODO update total time entry */ });
+      if(noIssue)           ajax = this.updateTime (timeData).done(() => { if(correctTimeDisplay) this.correctTimeDisplay() });
       if(noTime )           ajax = this.updateIssue(this.id, issueData);
     }
 
@@ -147,6 +150,16 @@ class Issue {
 
     this.dirt.clean.time.$el.text(utils.prettifyTime(this.dirt.clean.time.val));
     this.setDirt('time', null);
+
+    return this;
+  }
+
+  correctTimeDisplay(){
+    // NOTE minimal time emtry in redmine is 0.01 hour (36s)
+    // when updating time entry, this class send 0.01h for anything below 36s
+    // If this method is called, we send an 36s entry but spend less time, so timer is out of sync with remote data
+    // Now we're going to correct this
+    this.dirt.clean.time.$el.text(utils.prettifyTime(this.dirt.clean.time.val + .01));
 
     return this;
   }
